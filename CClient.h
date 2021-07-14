@@ -1,7 +1,6 @@
 #pragma once
 #include <afxsock.h>
 
-#define MAX_BUFFER_SIZE 2048
 class CClient :
     public CSocket
 {

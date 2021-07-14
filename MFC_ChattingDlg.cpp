@@ -62,10 +62,14 @@ void CMFCChattingDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST_CHAT, m_List);
 }
 
+// 리소스뷰 -> MFC DIALOG 에서 더블클릭을 해줘야 링크되면서 함수가 만들어짐.
 BEGIN_MESSAGE_MAP(CMFCChattingDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_EN_CHANGE(IDC_EDIT_CHAT_TEXT, &CMFCChattingDlg::OnEnChangeEditChatText)
+	ON_BN_CLICKED(IDC_BUTTON_SEND, &CMFCChattingDlg::OnBnClickedButtonSend)
+	ON_LBN_SELCHANGE(IDC_LIST_CHAT, &CMFCChattingDlg::OnLbnSelchangeListChat)
 END_MESSAGE_MAP()
 
 
@@ -103,6 +107,20 @@ BOOL CMFCChattingDlg::OnInitDialog()
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	m_Client.Create();
 	m_Client.Connect(_T("127.0.0.1"), 9000);
+
+	m_List.AddString((CString)"이름을 입력하세요");
+	//ZeroMemory(&name, sizeof(name));
+	//CString name;
+	//GetDlgItemText(IDC_EDIT_CHAT_TEXT, name);
+
+	//if (!name.IsEmpty())
+	//{
+	//	SetDlgItemText(IDC_EDIT_CHAT_TEXT, _T(""));
+	//	char buf_name[MAX_NAME_SIZE];
+	//	CW2A message2(name.GetString());
+	//	strcpy_s(buf_name, sizeof(buf_name), message2.m_szBuffer);
+	//	sprintf_s(send_packet.name, buf_name, MAX_NAME_SIZE);
+	//}
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -156,19 +174,61 @@ HCURSOR CMFCChattingDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+void CMFCChattingDlg::OnEnChangeEditChatText()
+{
+	// TODO:  RICHEDIT 컨트롤인 경우, 이 컨트롤은
+	// CDialogEx::OnInitDialog() 함수를 재지정 
+	//하고 마스크에 OR 연산하여 설정된 ENM_CHANGE 플래그를 지정하여 CRichEditCtrl().SetEventMask()를 호출하지 않으면
+	// 이 알림 메시지를 보내지 않습니다.
+
+	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
 void CMFCChattingDlg::OnBnClickedButtonSend()
 {
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	CString msg;
-	GetDlgItemText(IDC_EDIT_CHAT_TEXT, msg);
-	if (msg.IsEmpty())
+
+	if (!name.IsEmpty())
 	{
-		m_List.AddString(msg);
+		char buf_name[MAX_NAME_SIZE];
+		CW2A message2(name.GetString());
+		strcpy_s(buf_name, sizeof(buf_name), message2.m_szBuffer);
+	}
+	else
+	{
+		GetDlgItemText(IDC_EDIT_CHAT_TEXT, name);
+		SetDlgItemText(IDC_EDIT_CHAT_TEXT, _T(""));
+		char buf_name[MAX_NAME_SIZE];
+		CW2A message2(name.GetString());
+		strcpy_s(buf_name, sizeof(buf_name), message2.m_szBuffer);
+	}
+
+	GetDlgItemText(IDC_EDIT_CHAT_TEXT, msg);
+	if (!msg.IsEmpty() && !name.IsEmpty())
+	{
+		Packet send_packet;
+		ZeroMemory(&send_packet, sizeof(send_packet));
+
 		SetDlgItemText(IDC_EDIT_CHAT_TEXT, _T(""));
 
-		char buf[10];
+		char buf_name[MAX_NAME_SIZE];
+		char buf[MAX_BUFFER_SIZE];
+		CW2A message2(name.GetString());
 		CW2A message(msg.GetString());
+		strcpy_s(buf_name, sizeof(buf_name), message2.m_szBuffer);
 		strcpy_s(buf, sizeof(buf), message.m_szBuffer);
 
-		m_Client.Send(buf, sizeof(buf));
+		sprintf_s(send_packet.name, buf_name, MAX_NAME_SIZE);
+		sprintf_s(send_packet.buf, buf, MAX_BUFFER_SIZE);
+
+		m_Client.Send(&send_packet, sizeof(send_packet));
 	}
+}
+
+
+void CMFCChattingDlg::OnLbnSelchangeListChat()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
