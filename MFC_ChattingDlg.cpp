@@ -203,6 +203,7 @@ void CMFCChattingDlg::OnBnClickedButtonSend()
 		char buf_name[MAX_NAME_SIZE];
 		CW2A message2(name.GetString());
 		strcpy_s(buf_name, sizeof(buf_name), message2.m_szBuffer);
+		m_List.AddString((CString)"내용을 입력해주세요");
 	}
 
 	GetDlgItemText(IDC_EDIT_CHAT_TEXT, msg);
