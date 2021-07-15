@@ -190,24 +190,20 @@ void CMFCChattingDlg::OnBnClickedButtonSend()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	CString msg;
 
-	if (!name.IsEmpty())
-	{
-		char buf_name[MAX_NAME_SIZE];
-		CW2A message2(name.GetString());
-		strcpy_s(buf_name, sizeof(buf_name), message2.m_szBuffer);
-	}
-	else
+	if (name.IsEmpty())
 	{
 		GetDlgItemText(IDC_EDIT_CHAT_TEXT, name);
 		SetDlgItemText(IDC_EDIT_CHAT_TEXT, _T(""));
-		char buf_name[MAX_NAME_SIZE];
-		CW2A message2(name.GetString());
-		strcpy_s(buf_name, sizeof(buf_name), message2.m_szBuffer);
+
+		if (name.IsEmpty())
+			name = "익명";
+
 		m_List.AddString((CString)"내용을 입력해주세요");
+		return;
 	}
 
 	GetDlgItemText(IDC_EDIT_CHAT_TEXT, msg);
-	if (!msg.IsEmpty() && !name.IsEmpty())
+	if(!msg.IsEmpty())
 	{
 		Packet send_packet;
 		ZeroMemory(&send_packet, sizeof(send_packet));
